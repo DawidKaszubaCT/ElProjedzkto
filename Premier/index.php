@@ -7,14 +7,18 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <main>
     <aside>
         <a href="index.php">Strona główna</a>
     </aside>
 
      <section>
-
+        
      </section>
-     
+    </main>
+
+
+    
     <footer>
         <h2>Copyright by Super sigmas!</h2>
     </footer>
