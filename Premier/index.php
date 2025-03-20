@@ -8,17 +8,29 @@
 </head>
 <body>
     <main>
+
+    <!--aside - menu po lewej -->
+
     <aside>
         <a href="index.php">Strona główna</a>
     </aside>
 
-     <section>
-        
-     </section>
+    <!--section - główna część strony-->
+    <section id="glowna">
+        <section class="blok">
+        <h2>bla bla bla</h2>
+        </section>
+        <section class="blok">
+        <h2>bla bla bla</h2>
+        </section>
+        <section class="blok">
+        <h2>bla bla bla</h2>
+        </section>
+    </section>
     </main>
 
 
-    
+
     <footer>
         <h2>Copyright by Super sigmas!</h2>
     </footer>
