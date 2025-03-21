@@ -5,7 +5,7 @@ body{
 }
 aside{
     background-color: #a943e4;
-    width: 10%;
+    width: 20%;
     height: 95vh;
     text-align: center;
     border-right: 2px black solid;
@@ -31,16 +31,20 @@ main{
 }
 #glowna{
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     align-items: center;
-    justify-content: space-evenly;
-    width: 80%;
 }
 .blok{
-    height: 25%;
-    width: 25%;
+    height: 40vh;
+    width: 66%;
+    margin: 10px;
     background-color: white;
     border-radius: 10px;
     text-align: center;
     box-shadow: 2px 2px 2px black;
+}
+#article-glowna{
+    overflow-y: scroll;
+    height: 95vh;
+    width: 100%;
 }

@@ -16,6 +16,7 @@
     </aside>
 
     <!--section - główna część strony-->
+    <article id="article-glowna">
     <section id="glowna">
         <section class="blok">
         <h2>bla bla bla</h2>
@@ -26,7 +27,18 @@
         <section class="blok">
         <h2>bla bla bla</h2>
         </section>
+        <section class="blok">
+        <h2>bla bla bla</h2>
+        </section>
+        <section class="blok">
+        <h2>bla bla bla</h2>
+        </section>
+        <section class="blok">
+        <h2>bla bla bla</h2>
+        </section>
+        
     </section>
+</article>
     </main>
 
 
