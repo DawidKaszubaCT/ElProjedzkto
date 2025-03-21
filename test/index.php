@@ -12,6 +12,7 @@
     <!--aside - menu po lewej -->
 
     <aside>
+        <img src="https://play-lh.googleusercontent.com/Q1MR4HdK1BYqEdhhHKfVJ_pqI2nwEKGaOu6d3Hx46NfNSD2f3Q4SwTo9Jw9o49bLAkU">
         <a href="index.php">Strona główna</a>
     </aside>
 
