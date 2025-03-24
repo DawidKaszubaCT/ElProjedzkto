@@ -91,25 +91,6 @@ $conn->close();
     </style>
 </head>
 <body>
-<script>
-        document.addEventListener("DOMContentLoaded", function() {
-            const links = document.querySelectorAll("aside a");
-            const boxes = document.querySelectorAll(".box");
-            
-            links.forEach((link, index) => {
-                link.addEventListener("click", () => {
-                    boxes.forEach(box => box.classList.remove("active"));
-                    if (boxes[index]) {
-                        boxes[index].classList.add("active");
-                        
-                        setTimeout(() => {
-                            boxes[index].classList.remove("active");
-                        }, 3000); 
-                    }
-                });
-            });
-        });
-    </script>
     <main>
         <!-- Menu boczne -->
         <aside>
