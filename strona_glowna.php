@@ -13,15 +13,17 @@ $kluby = [];
 $gole = [];
 $colors = []; // Kolory dla klubów
 $gradientSegments = []; // Segmenty gradientu
-
+$klubcolors = [];
 
 if ($result->num_rows > 0) {
     $totalGole = 0; // Suma goli
+    $totalStracone = 0; // Suma straconych
 
     while ($row = $result->fetch_assoc()) {
         $kluby[] = $row['Nazwa'];
         $gole[] = $row['Bramki_zdobyte'];
         $totalGole += $row['Bramki_zdobyte']; 
+        $totalStracone += $row['Bramki_stracone'];
     }
 
     // Generowanie kolorów i gradientów
@@ -35,6 +37,7 @@ if ($result->num_rows > 0) {
         $hue = ($index * (360 / $numClubs)) % 360; // Zróżnicowanie kolorów
         $color = "hsl($hue, 80%, 50%)";
         $colors[] = $color;
+        $klubcolors[$kluby[$index]] = $color;
 
         $gradientSegments[] = "{$color} {$startAngle}deg, {$color} {$endAngle}deg";
         $startAngle = $endAngle; // Aktualizacja kąta startowego
@@ -44,9 +47,56 @@ if ($result->num_rows > 0) {
 }
 
 // Pobieranie danych z tabel asystenci, zolte, czerwone
+        $imieasystant = [];
+        $ilosasystant= [];
+        $klubasystant= [];
 $asysty = $conn->query("SELECT Imie_nazwisko, Ilosc, klub FROM asystenci");
+if ($asysty->num_rows > 0) {
+    while ($row = $asysty->fetch_assoc()) {
+        $imieasystant[] = $row['Imie_nazwisko'];
+        $ilosasystant[] = $row['Ilosc'];
+        $klubasystant[] = $row['klub'];
+    }
+}
+
+        $imiezolte = [];
+        $iloszolte = [];
+        $klubzolte = [];
 $zolte = $conn->query("SELECT Imie_nazwisko, Ilosc, klub FROM zolte");
+if ($zolte->num_rows > 0) {
+    while ($row = $zolte->fetch_assoc()) {
+        $imiezolte[] = $row['Imie_nazwisko'];
+        $iloszolte[] = $row['Ilosc'];
+        $klubzolte[] = $row['klub'];
+    }
+}
+
+        $imieczerwone = [];
+        $ilosczerwone = [];
+        $klubczerwone = [];
 $czerwone = $conn->query("SELECT Imie_nazwisko, Ilosc, klub FROM czerwone");
+if ($czerwone->num_rows > 0) {
+    while ($row = $czerwone->fetch_assoc()) {
+        $imieczerwone[] = $row['Imie_nazwisko'];
+        $ilosczerwone[] = $row['Ilosc'];
+        $klubczerwone[] = $row['klub'];
+    }
+}
+
+$sql2 = "SELECT Imie_nazwisko, Ilosc, klub FROM strzelcy";
+$result2 = $conn->query($sql2);
+
+$imiona = [];
+$ilosci = [];
+$klub = [];
+
+if ($result2->num_rows > 0) {
+    while ($row = $result2->fetch_assoc()) {
+        $imiona[] = $row['Imie_nazwisko'];
+        $ilosci[] = $row['Ilosc'];
+        $klub[] = $row['klub'];
+    }
+}
 
 // Struktura danych dla sekcji
 $sections = [
@@ -71,38 +121,38 @@ $conn->close();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="style3.css">
     <style>
-        .container {
-            width: 100%;
-            height: 100%;
-            border-radius: 50%;
+        .slice {
+            width: 300px;
+            height: 300px;
+            position: relative;
             background: conic-gradient(<?php echo $gradient; ?>);
-        }
-        #klubList li {
-            display: flex;
-            align-items: center;
-            margin-bottom: 10px;
-        }
-        .color-box {
-            width: 20px;
-            height: 20px;
-            margin-right: 10px;
-            border: 1px solid #000;
+            clip-path: circle(50% at 50% 50%);
         }
     </style>
 </head>
 <body>
     <main>
         <!-- Menu boczne -->
-        <aside>
+<aside>
             <h2>Menu</h2>
-            <a href="#">Tabela</a>
-            <a href="#">Gole</a>
-            <a href="#">Asysty</a>
-            <a href="#">Żółta kartka</a>
-            <a href="#">Czerwona kartka</a>
-            <a href="#">Gole zdobyte</a>
-            <a href="#">Gole stracone</a>
-            <a href="#">Bilans</a>
+            <a href="#" class="Rakow">Raków Częstochowa</a>
+            <a href="#" class="Jaga">Jagiellonia Białystok</a>
+            <a href="#" class="Lech">Lech Poznań</a>
+            <a href="#" class="Pogon">Pogoń Szczecin</a>
+            <a href="#" class="Legia">Legia Warszawa</a>
+            <a href="#" class="Gornik">Górnik Zabrze</a>
+            <a href="#" class="Cracovia">Cracovia</a>
+            <a href="#" class="Motor">Motor Lublin</a>
+            <a href=""  class="GKS">GKS Katowice</a>
+            <a href="" class="Piast">Piast Gliwice</a>
+            <a href="" class="Korona">Korona Kielce</a>
+            <a href="" class="Radom">Radomiak Radom</a>
+            <a href="" class="Lodz">Widzew Łódź</a>
+            <a href="" class="Puszcza">Puszcza</a>
+            <a href="" class="Stal">Stal Mielec</a>
+            <a href="" class="Lubin">Zagłębie Lubin</a>
+            <a href="" class="Lechia">Lechia Gdańsk</a>
+            <a href="" class="Slask">Śląsk Wrocław</a>
         </aside>
 
         <!-- Główna sekcja -->
@@ -111,10 +161,10 @@ $conn->close();
             <div class="box">
                 <h3>Tabela klubów</h3>
                 <ul id="klubList">
-                    <?php foreach ($kluby as $index => $klub): ?>
+                    <?php foreach ($kluby as $index => $kluby2): ?>
                         <li>
                             <div class="color-box" style="background-color: <?php echo $colors[$index]; ?>;"></div>
-                            <?php echo $klub; ?>
+                            <?php echo $kluby2; ?>
                         </li>
                     <?php endforeach; ?>
                 </ul>
@@ -123,17 +173,68 @@ $conn->close();
             <!-- Blok z wykresem -->
             <div class="box">
                 <h3>Gole zdobyte (wykres)</h3>
-                <div class="pie-chart">
-                <div class="container" style="background: conic-gradient(<?php echo $gradient; ?>); width: 300px; height: 300px; border-radius: 50%; display: block;"></div>
-
+        <div class="chart-container">
+        <div class="bar-chart">
+            <?php foreach ($ilosci as $index => $ilosc): ?>
+                <div class="bar" style="height: <?php echo ($ilosc * 20); ?>px; background-color: <?php echo $klubcolors[$klub[$index]]; ?>;" title="<?php echo $imiona[$index] ?>">
+                    <?php echo $imiona[$index] . " " . $ilosc; ?>
                 </div>
+            <?php endforeach; ?>
+        </div>
+    </div>
+
             </div>
 
-            <div class="box">Asysty (wykres)</div>
-            <div class="box">Żółta kartka (wykres)</div>
-            <div class="box">Czerwona kartka (wykres)</div>
-            <div class="box">Gole zdobyte (wykres z klubowych)</div>
-            <div class="box">Gole stracone (wykres z klubowych)</div>
+            <div class="box"><h3>Asysty (wykres)</h3> 
+            <div class="chart-container">
+        <div class="bar-chart">
+            <?php foreach ($ilosasystant as $index => $iloscasystant): ?>
+                <div class="bar" style="height: <?php echo ($iloscasystant * 40); ?>px; background-color: <?php echo $klubcolors[$klubasystant[$index]]; ?>;" title="<?php echo $imieasystant[$index] ?>">
+                    <?php echo $imieasystant[$index] . " " . $iloscasystant; ?>
+                </div>
+            <?php endforeach; ?>
+        </div>
+    </div>
+</div>
+            <div class="box"><h3>Żółta kartka (wykres)</h3>
+            <div class="chart-container">
+        <div class="bar-chart">
+            <?php foreach ($iloszolte as $index => $ilosczolte): ?>
+                <div class="bar" style="height: <?php echo ($ilosczolte * 35); ?>px; background-color: <?php echo $klubcolors[$klubzolte[$index]]; ?>;" title="<?php echo $imiezolte[$index] ?>">
+                    <?php echo $imiezolte[$index] . " " . $ilosczolte; ?>
+                </div>
+            <?php endforeach; ?>
+        </div>
+    </div>
+</div>
+
+
+
+            <div class="box"><h3>Czerwona kartka (wykres)</h3>
+
+            <div class="chart-container">
+        <div class="bar-chart">
+            <?php foreach ($ilosczerwone as $index => $iloscczerwone): ?>
+                <div class="bar" style="height: <?php echo ($iloscczerwone * 150); ?>px; background-color: <?php echo $klubcolors[$klubczerwone[$index]]; ?>;" title="<?php echo $imieczerwone[$index] ?>">
+                    <?php echo $imieczerwone[$index] . " " . $iloscczerwone; ?>
+                </div>
+            <?php endforeach; ?>
+        </div>
+    </div>
+            </div>
+
+            <div class="box"><h3>Gole zdobyte (wykres z klubowych)</h3>
+                <div class="slice">
+                    <div class="dot"><?php echo $totalGole ?></div>
+                </div>
+
+                
+            </div>
+            <div class="box"><h3>Gole stracone (wykres z klubowych)</h3>
+                <div class="slice">
+                    <div class="dot"><?php echo $totalStracone ?></div>
+                </div>
+        </div>
             <div class="box">Bilans (wykres => bramki zdobyte - bramki stracone)</div>
         </section>
     </main>
