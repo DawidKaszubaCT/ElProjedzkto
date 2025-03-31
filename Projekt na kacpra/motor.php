@@ -1,67 +1,12 @@
 <?php
 $conn = new mysqli("localhost", "root", "", "ekstraklasa");
+$winrate = $conn->query("SELECT Winrate FROM kluby where IDK = 8");
 
-if ($conn->connect_error) {
-    die("Błąd połączenia z bazą danych: " . $conn->connect_error);
-}
+$win = $conn->query("SELECT Wygrane FROM kluby WHERE IDK = 8");
+$draw = $conn->query("SELECT Remisy FROM kluby WHERE IDK = 8");
+$lose = $conn->query("SELECT Przegrane FROM kluby WHERE IDK = 8");
 
-// Pobieranie danych z tabeli kluby
-$sql = "SELECT * FROM kluby";
-$result = $conn->query($sql);
-
-$kluby = [];
-$gole = [];
-$colors = []; // Kolory dla klubów
-$gradientSegments = []; // Segmenty gradientu
-
-
-if ($result->num_rows > 0) {
-    $totalGole = 0; // Suma goli
-
-    while ($row = $result->fetch_assoc()) {
-        $kluby[] = $row['Nazwa'];
-        $gole[] = $row['Bramki_zdobyte'];
-        $totalGole += $row['Bramki_zdobyte']; 
-    }
-
-    // Generowanie kolorów i gradientów
-    $startAngle = 0;
-    $numClubs = count($kluby); // Liczba klubów
-    foreach ($gole as $index => $gol) {
-        $percent = ($gol / $totalGole) * 100; // Procent udziału goli
-        $endAngle = $startAngle + ($percent * 3.6); // Obliczenie końcowego kąta
-
-        // Generowanie unikalnego koloru HSL
-        $hue = ($index * (360 / $numClubs)) % 360; // Zróżnicowanie kolorów
-        $color = "hsl($hue, 80%, 50%)";
-        $colors[] = $color;
-
-        $gradientSegments[] = "{$color} {$startAngle}deg, {$color} {$endAngle}deg";
-        $startAngle = $endAngle; // Aktualizacja kąta startowego
-    }
-
-    $gradient = implode(", ", $gradientSegments); // Łączenie segmentów w gradient
-}
-
-// Pobieranie danych z tabel asystenci, zolte, czerwone
-$asysty = $conn->query("SELECT Imie_nazwisko, Ilosc, klub FROM asystenci");
-$zolte = $conn->query("SELECT Imie_nazwisko, Ilosc, klub FROM zolte");
-$czerwone = $conn->query("SELECT Imie_nazwisko, Ilosc, klub FROM czerwone");
-
-// Struktura danych dla sekcji
-$sections = [
-    "Asysty" => $asysty,
-    "Żółta kartka" => $zolte,
-    "Czerwona kartka" => $czerwone,
-    "Gole zdobyte" => $result,
-    "Gole stracone" => $result,
-    "Bilans" => $result
-];
-
-$conn->close();
 ?>
-
-
 
 
 <!DOCTYPE html>
@@ -160,13 +105,115 @@ $conn->close();
             transition: 1s ease-in;
             padding:10px;
         }
+        .box_wdl, .box_poz,.box_wr{
+            background: white;
+            padding: 10px;
+            text-align: center;
+            border: 2px solid #081ca4;
+            border-radius: 10px;
+            box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            min-height: 150px;
+        }
+        .box_wdl{
+            display: flex;
+            justify-content:center;
+            align-items: center;
+            flex-direction:column;
+            background: #efe500;
+            color:#25479a;
+            border: 2px solid white;
+            
+        }
+        .box_wdl p{
+            height:15%;
+            text-align:center;
+            font-size:50px;
+            margin:15px;
+        }
+        #numer{
+            display: flex;
+            align-items:center;
+            justify-content:center;
+            font-size: 120px;
+            height:80%;
+        }
+        #rakow_logo{
+            width:auto;
+            height:300px;
+        }
+        .box{
+            display:flex;
+            justify-content:center;
+            align-items:center;
+        }
+        .slice{
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: conic-gradient(
+                green 0% 40%,
+                gray 40% 64%,
+                red 64% 100%
+            );
+            clip-path: circle(50% at 50% 50%);
+        }
+        .dot{
+            width: 80%;
+            height: 80%;
+            background-color: white;
+            position: absolute;
+            top: 10%;
+            left: 10%;
+            clip-path: circle(50% at 50% 50%);
+            display: flex;
+            justify-content: center;
+            align-items:center;
+            font-size:60px;
+        }
+        .container{
+            position: relative;
+            width: 300px;
+            height: 300px;
+            border-radius: 50%;
+            background: #ddd;
+            overflow: hidden;
+        }
+        #wykres{
+            height:80%;
+            display:flex;
+            justify-content:center;
+            align-items: center;
+        }
+        #main-section{
+            grid-template-columns: repeat(3, 1fr);
+        }
+        #minimg{
+            width:auto;
+            height:120px;
+            margin-right:12px;
+            margin-left:12px;
+        }
+        #box{
+            font-size: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+        #content{
+            display:flex;
+            justify-content:center;
+            align-items: center;
+        }
+        .next_match{
+            margin-bottom:70px;
+        }
     </style>
 </head>
 <body>
     <main>
         <!-- Menu boczne -->
         <aside>
-            <h2>Menu</h2>
+        <h2>Menu</h2>
             <a href="rakow.php" class="Rakow">Raków Częstochowa</a>
             <a href="jagiellonia.php" class="Jaga">Jagiellonia Białystok</a>
             <a href="lech.php" class="Lech">Lech Poznań</a>
@@ -186,39 +233,64 @@ $conn->close();
             <a href="lechia.php" class="Lechia">Lechia Gdańsk</a>
             <a href="slask.php" class="Slask">Śląsk Wrocław</a>
 
-            
+            <a href="strona_glowna.php">Powrot</a>
         </aside>
 
         <!-- Główna sekcja -->
         <section id="main-section">
-            <!-- Tabela klubów -->
-            <div class="box">
-                <h3>Tabela klubów</h3>
-                <ul id="klubList">
-                    <?php foreach ($kluby as $index => $klub): ?>
-                        <li>
-                            <div class="color-box" style="background-color: <?php echo $colors[$index]; ?>;"></div>
-                            <?php echo $klub; ?>
-                        </li>
-                    <?php endforeach; ?>
-                </ul>
+            <div class="box"><img src="https://upload.wikimedia.org/wikipedia/en/thumb/1/14/Motor_Lublin.svg/1200px-Motor_Lublin.svg.png" id="rakow_logo"></div>
+            <div class="box_wdl">
+                <p>
+                    Wygrane: <?php
+                         $row = $win->fetch_assoc();
+                        printf("%s", $row["Wygrane"]);?>
+                </p>
+                <p>
+                    Remisy: <?php
+                         $row = $draw->fetch_assoc();
+                        printf("%s", $row["Remisy"]);?>
+                </p>
+                <p>
+                    Przegrane: <?php
+                         $row = $lose->fetch_assoc();
+                        printf("%s", $row["Przegrane"]);?>
+                </p>
             </div>
-
-            <!-- Blok z wykresem -->
-            <div class="box">
-                <h3>Gole zdobyte (wykres)</h3>
-                <div class="pie-chart">
-                <div class="container" style="background: conic-gradient(<?php echo $gradient; ?>); width: 300px; height: 300px; border-radius: 50%; display: block;"></div>
-
+            <div class="box_wr">
+                <h1>Winrate</h1>
+                <div id="wykres">
+                    <div class="container">
+                        <div class="slice"></div>
+                        <div class="dot">
+                            <?php
+                                $row = $winrate->fetch_assoc();
+                                printf("%s", $row["Winrate"]);
+                            ?>%
+                        </div>
+                    </div>
                 </div>
             </div>
-
-            <div class="box" id="wrapper">Asysty (wykres)</div>
-            <div class="box">Żółta kartka (wykres)</div>
-            <div class="box">Czerwona kartka (wykres)</div>
-            <div class="box">Gole zdobyte (wykres z klubowych)</div>
-            <div class="box">Gole stracone (wykres z klubowych)</div>
-            <div class="box">Bilans (wykres => bramki zdobyte - bramki stracone)</div>
+            <div class="box_poz"> <h1>Pozycja</h1> 
+            <div id="numer">8</div></div>
+            <div class="box" id="box">
+            <h1 class="next_match">Poprzedni mecz</h1>
+            <div id="content">
+                <img src="https://upload.wikimedia.org/wikipedia/en/thumb/1/14/Motor_Lublin.svg/1200px-Motor_Lublin.svg.png" id="minimg">
+                Motor 4:1 Stal
+                <img src="https://seeklogo.com/images/F/fks-stal-mielec-logo-B8F2E44605-seeklogo.com.png" id="minimg">
+            </div>
+            </div>
+            <div class="box" id="box">
+                <h1 class="next_match">Nastepny mecz</h1>
+                <div id="content">
+                    <img src="https://upload.wikimedia.org/wikipedia/en/thumb/1/14/Motor_Lublin.svg/1200px-Motor_Lublin.svg.png" id="minimg">
+                    Motor - Slask
+                    
+                    <img src="https://wks-slask.wroc.pl/wp-content/uploads/2020/03/herb.png" id="minimg">
+                </div>
+                <p>05.04.25 17:30</p>   
+            </div>
+           
         </section>
     </main>
 
