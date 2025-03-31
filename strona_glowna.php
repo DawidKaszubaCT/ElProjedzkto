@@ -11,9 +11,15 @@ $result = $conn->query($sql);
 
 $kluby = [];
 $gole = [];
+$stracone = [];
+$bilans = [];
 $colors = []; // Kolory dla klubów
+$colors2 = []; // Kolory dla klubów
 $gradientSegments = []; // Segmenty gradientu
+$gradientSegments2 = [];
 $klubcolors = [];
+
+
 
 if ($result->num_rows > 0) {
     $totalGole = 0; // Suma goli
@@ -22,6 +28,8 @@ if ($result->num_rows > 0) {
     while ($row = $result->fetch_assoc()) {
         $kluby[] = $row['Nazwa'];
         $gole[] = $row['Bramki_zdobyte'];
+        $stracone[] = $row['Bramki_stracone'];
+        $bilans[] = $row['Bilans'];
         $totalGole += $row['Bramki_zdobyte']; 
         $totalStracone += $row['Bramki_stracone'];
     }
@@ -44,6 +52,24 @@ if ($result->num_rows > 0) {
     }
 
     $gradient = implode(", ", $gradientSegments); // Łączenie segmentów w gradient
+
+    $startAngle2 = 0;
+    $numClubs2 = count($kluby); // Liczba klubów
+    foreach ($stracone as $index => $strata) {
+        $percent2 = ($strata / $totalStracone) * 100; // Procent udziału goli
+        $endAngle2 = $startAngle2 + ($percent2 * 3.6); // Obliczenie końcowego kąta
+
+        // Generowanie unikalnego koloru HSL
+        $hue2 = ($index * (360 / $numClubs)) % 360; // Zróżnicowanie kolorów
+        $color2 = "hsl($hue2, 80%, 50%)";
+        $colors2[] = $color2;
+        $klubcolors[$kluby[$index]] = $color2;
+
+        $gradientSegments2[] = "{$color2} {$startAngle2}deg, {$color2} {$endAngle2}deg";
+        $startAngle2 = $endAngle2; // Aktualizacja kąta startowego
+    }
+
+    $gradient2 = implode(", ", $gradientSegments2); // Łączenie segmentów w gradient
 }
 
 // Pobieranie danych z tabel asystenci, zolte, czerwone
@@ -128,6 +154,13 @@ $conn->close();
             background: conic-gradient(<?php echo $gradient; ?>);
             clip-path: circle(50% at 50% 50%);
         }
+        .slice2 {
+            width: 300px;
+            height: 300px;
+            position: relative;
+            background: conic-gradient(<?php echo $gradient2; ?>);
+            clip-path: circle(50% at 50% 50%);
+}
     </style>
 </head>
 <body>
@@ -214,6 +247,7 @@ $conn->close();
 
             <div class="chart-container">
         <div class="bar-chart">
+            
             <?php foreach ($ilosczerwone as $index => $iloscczerwone): ?>
                 <div class="bar" style="height: <?php echo ($iloscczerwone * 150); ?>px; background-color: <?php echo $klubcolors[$klubczerwone[$index]]; ?>;" title="<?php echo $imieczerwone[$index] ?>">
                     <?php echo $imieczerwone[$index] . " " . $iloscczerwone; ?>
@@ -226,16 +260,29 @@ $conn->close();
             <div class="box"><h3>Gole zdobyte (wykres z klubowych)</h3>
                 <div class="slice">
                     <div class="dot"><?php echo $totalGole ?></div>
-                </div>
-
-                
+                </div>    
             </div>
+
             <div class="box"><h3>Gole stracone (wykres z klubowych)</h3>
-                <div class="slice">
+                <div class="slice2">
                     <div class="dot"><?php echo $totalStracone ?></div>
                 </div>
         </div>
-            <div class="box">Bilans (wykres => bramki zdobyte - bramki stracone)</div>
+            <div class="box"><h3>Bilans</h3> 
+            <div class="chart-container">
+    <div class="bar-chart">
+    <?php 
+array_multisort($bilans, SORT_DESC, $kluby, $colors); 
+foreach ($bilans as $index => $bilan): ?>
+
+            <div class="bar" style="height: <?php echo ($bilan * 15); ?>px; background-color: <?php echo $colors[$index]; ?>;" title="<?php echo $kluby[$index] ?>">
+                <?php echo $kluby[$index] . " " . $bilan; ?>
+            </div>
+        <?php endforeach; ?>
+    </div>
+</div>
+        
+        </div>
         </section>
     </main>
 
